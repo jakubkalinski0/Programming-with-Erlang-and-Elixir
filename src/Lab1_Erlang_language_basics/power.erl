@@ -25,6 +25,6 @@ power(0, 0) -> none;                      % Undefined case: 0^0
 power(_, 0) -> 1;                          % Any number to the power of 0 is 1
 power(0, _) -> 0;                          % 0 raised to any positive power is 0
 power(Base, Exp) when Exp > 0 ->           % Recursive case for positive exponent
-  Base * power(Base, Exp - 1);
+    Base * power(Base, Exp - 1);
 power(Base, Exp) when Exp < 0 ->           % Handling negative exponent
-  1 / power(Base, -Exp).
+    1 / power(Base, -Exp).
