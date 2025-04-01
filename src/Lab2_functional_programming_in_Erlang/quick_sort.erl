@@ -33,7 +33,7 @@ grt_eq_than(List, Arg) -> [X || X <- List, X >= Arg].
 %% The algorithm then recursively sorts both partitions and concatenates the results.
 qs([]) -> [];
 qs([Pivot | Tail]) ->
-  qs(less_than(Tail, Pivot)) ++ [Pivot] ++ qs(grt_eq_than(Tail, Pivot)).
+    qs(less_than(Tail, Pivot)) ++ [Pivot] ++ qs(grt_eq_than(Tail, Pivot)).
 
 %% @doc Generates a list of N random integers within the range [Min, Max].
 %% If Min > Max, an error is returned. If N is negative or zero, an error is returned.
@@ -47,11 +47,11 @@ random_elems(N, Min, Max) -> [rand:uniform(Max - Min + 1) + Min - 1 || _ <- list
 %% The function prints the execution times and indicates which algorithm was faster.
 compare_speeds([], _, _) -> none;
 compare_speeds(List, Fun1, Fun2) ->
-  {Time1, _} = timer:tc(Fun1, [List]),
-  {Time2, _} = timer:tc(Fun2, [List]),
-  io:format("Algorithm 1 took ~p microseconds.~n", [Time1]),
-  io:format("Algorithm 2 took ~p microseconds.~n", [Time2]),
-  case Time1 < Time2 of
-    true -> io:format("Algorithm 1 is faster.~n");
-    false -> io:format("Algorithm 2 is faster or they are equal.~n")
-  end.
+    {Time1, _} = timer:tc(Fun1, [List]),
+    {Time2, _} = timer:tc(Fun2, [List]),
+    io:format("Algorithm 1 took ~p microseconds.~n", [Time1]),
+    io:format("Algorithm 2 took ~p microseconds.~n", [Time2]),
+    case Time1 < Time2 of
+        true -> io:format("Algorithm 1 is faster.~n");
+        false -> io:format("Algorithm 2 is faster or they are equal.~n")
+    end.
