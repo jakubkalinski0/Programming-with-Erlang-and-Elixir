@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 14. mar 2019 12:50
 %%%-------------------------------------------------------------------
--module(pollution_test).
+-module(pollution_tests).
 -author("Wojciech Turek").
 
 -include_lib("eunit/include/eunit.hrl").
