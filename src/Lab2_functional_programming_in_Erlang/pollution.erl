@@ -17,7 +17,9 @@
     remove_value/4,
     get_one_value/4,
     get_station_mean/3,
-    get_daily_mean/3
+    get_daily_mean/3,
+    get_maximum_growth_time/3,
+    get_hourly_mean/4
 ]).
 
 % Create a new monitor
@@ -165,4 +167,61 @@ get_daily_mean(Type, Date, Monitor) ->
     case Values of
         [] -> {error, "No measurements found for this date and type"};
         _ -> lists:sum(Values) / length(Values)
+    end.
+
+% Find the hour with maximum growth of pollution level of a specific type for a station
+get_maximum_growth_time(NameOrCoords, Type, Monitor) ->
+    #{data := Data} = Monitor,
+
+    % Find the station
+    case find_station(NameOrCoords, Monitor) of
+        {ok, _StationName, StationCoords} ->
+            % Filter measurements for this station and type
+            Measurements = [{{DateTime, Value}} || {{Coords, DateTime, MeasType}, Value} <- maps:to_list(Data),
+                Coords =:= StationCoords, MeasType =:= Type],
+
+            % Sort measurements by time
+            SortedMeasurements = lists:sort(Measurements),
+
+            % Calculate growth between consecutive measurements
+            case calculate_growth(SortedMeasurements) of
+                [] -> {error, "Not enough measurements to calculate growth"};
+                Growth ->
+                    % Find maximum growth
+                    {MaxGrowthTime, _MaxGrowth} = lists:max(Growth, fun({_, Growth1}, {_, Growth2}) -> Growth1 > Growth2 end),
+                    MaxGrowthTime
+            end;
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+% Helper function to calculate growth between consecutive measurements
+calculate_growth(Measurements) ->
+    calculate_growth(Measurements, []).
+
+calculate_growth([_], Acc) ->
+    lists:reverse(Acc);
+calculate_growth([{DateTime1, Value1}, {DateTime2, Value2} | Rest], Acc) ->
+    Growth = Value2 - Value1,
+    % Using DateTime2 as the time of growth
+    calculate_growth([{DateTime2, Value2} | Rest], [{DateTime2, Growth} | Acc]).
+
+% Calculate the mean value of a type for a specific station at a specific hour of every day
+get_hourly_mean(NameOrCoords, Type, Hour, Monitor) ->
+    #{data := Data} = Monitor,
+
+    % Find the station
+    case find_station(NameOrCoords, Monitor) of
+        {ok, _StationName, StationCoords} ->
+            % Filter measurements for this station, type, and hour
+            Values = [Value || {{Coords, {_Date, {H, _, _}}, MeasType}, Value} <- maps:to_list(Data),
+                Coords =:= StationCoords, MeasType =:= Type, H =:= Hour],
+
+            % Calculate mean value if there are measurements
+            case Values of
+                [] -> {error, "No measurements found for this station, type, and hour"};
+                _ -> lists:sum(Values) / length(Values)
+            end;
+        {error, Reason} ->
+            {error, Reason}
     end.
